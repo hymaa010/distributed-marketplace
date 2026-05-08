@@ -3,6 +3,7 @@ package org.team13.marketplace.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.team13.marketplace.dto.PurchasedItem;
 import org.team13.marketplace.model.Item;
 import org.team13.marketplace.model.ItemStatus;
 import org.team13.marketplace.model.Transaction;
@@ -59,8 +60,7 @@ public class TransactionService {
         Transaction tx = Transaction.builder()
                 .buyerId(buyer.getId())
                 .sellerId(seller.getId())
-                .itemId(item.getId())
-                .amountPaid(totalCost)
+                .purchasedItem(new PurchasedItem(item))
                 .quantity(quantity)
                 .createdAt(LocalDateTime.now())
                 .build();

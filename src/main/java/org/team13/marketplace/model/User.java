@@ -22,9 +22,10 @@ public class User {
     private String id;
     @Indexed(unique = true)
     private String username;
+    @Indexed(unique = true)
+    private String email;
     private String passwordHash;
     @Builder.Default
     private Double balance = 0.0;
-    private String sessionToken;
     private LocalDateTime createdAt;
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Sharded;
+import org.team13.marketplace.dto.PurchasedItem;
 
 import java.time.LocalDateTime;
 
@@ -21,8 +22,7 @@ public class Transaction {
     private String id;
     private String buyerId;
     private String sellerId;
-    private String itemId;
-    private Double amountPaid;
+    private PurchasedItem purchasedItem;
     private Integer quantity;
     private LocalDateTime createdAt;
 }
