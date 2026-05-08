@@ -1,31 +1,28 @@
 package org.team13.marketplace.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.team13.marketplace.model.User;
 import org.team13.marketplace.repository.UserRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    @Transactional // Ensures both documents are created or neither is
-    public User createNewAccount(String username, String password) {
-        User user = new User();
-        user.setUsername(username);
-        user.setBalance(0.0);
-        user = userRepository.save(user); // Generates the ID
+    public User register(String username, String password) {
+        User user = User.builder()
+                .username(username)
+                .passwordHash(passwordEncoder.encode(password))
+                .createdAt(LocalDateTime.now())
+                .build();
 
-//        UserDetails details = new UserDetails();
-//        details.setUserId(user.getId());
-//        details.setPurchasedItemIds(new ArrayList<>());
-//        detailsRepository.save(details);
-        return user;
+        return userRepository.save(user);
     }
 
     public Double getBalance(String userId) {

@@ -1,6 +1,7 @@
 package org.team13.marketplace.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.team13.marketplace.model.User;
 import org.team13.marketplace.repository.UserRepository;
@@ -9,27 +10,29 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-    @Autowired
-    private UserRepository userRepo;
+
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public String login(String username, String password) {
-        Optional<User> user = userRepo.findByUsername(username);
-        if (user.isPresent() && user.get().getPassword().equals(password)) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent() && passwordEncoder.matches(password, user.get().getPasswordHash())) {
             // Generate a random session token
             String token = UUID.randomUUID().toString();
             user.get().setSessionToken(token);
-            userRepo.save(user.get());
+            userRepository.save(user.get());
             return token;
         }
         return "AUTH_FAILED";
     }
 
     public boolean isValid(String token) {
-        return userRepo.existsBySessionToken(token);
+        return userRepository.existsBySessionToken(token);
     }
 
     public Optional<User> getUserByToken(String token) {
-        return userRepo.findBySessionToken(token);
+        return userRepository.findBySessionToken(token);
     }
 }

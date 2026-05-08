@@ -39,7 +39,7 @@ public class ClientHandler {
 
                 if (command.equals("REGISTER")) {
                     String[] creds = payload.split(",");
-                    User user = userService.createNewAccount(creds[0], creds[1]);
+                    User user = userService.register(creds[0], creds[1]);
                     out.println("SUCCESS|" + mapper.writeValueAsString(user));
                 }
                 else if (command.equals("LOGIN")) {

@@ -1,6 +1,6 @@
 package org.team13.marketplace.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.team13.marketplace.model.Item;
 import org.team13.marketplace.model.User;
@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ItemService {
-    @Autowired private ItemRepository itemRepository;
-    @Autowired private AuthService authService;
+
+    private final ItemRepository itemRepository;
+    private final AuthService authService;
 
     public Item addItem(String token, Item item) {
         Optional<User> buyerAuth = authService.getUserByToken(token);
@@ -23,7 +25,7 @@ public class ItemService {
     public List<Item> getAllItems() { return itemRepository.findAll(); }
 
     public List<Item> searchItems(String query) {
-        return itemRepository.findByNameContainingIgnoreCaseOrBrandContainingIgnoreCase(query, query);
+        return itemRepository.searchByNameOrBrand(query);
     }
 
     public void deleteItem(String id) { itemRepository.deleteById(id); }

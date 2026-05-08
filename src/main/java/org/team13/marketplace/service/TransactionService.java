@@ -1,9 +1,10 @@
 package org.team13.marketplace.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team13.marketplace.model.Item;
+import org.team13.marketplace.model.ItemStatus;
 import org.team13.marketplace.model.Transaction;
 import org.team13.marketplace.model.User;
 import org.team13.marketplace.repository.ItemRepository;
@@ -12,56 +13,66 @@ import org.team13.marketplace.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private TransactionRepository transactionRepository;
-    @Autowired
-    private ItemRepository itemRepository;
-    @Autowired
-    private AuthService authService;
+    private final UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
+    private final ItemRepository itemRepository;
 
-    // Requirement VI: Purchase Item
     @Transactional
-    public Integer purchaseItem(String token, Item item) {
-        // 1. Authenticate Buyer
-        Optional<User> buyerAuth = authService.getUserByToken(token);
-        if (buyerAuth.isEmpty()) return 403;
+    public Transaction purchaseItem(String buyerId, String itemId, int quantity) {
+        Item item = itemRepository.findById(itemId).orElseThrow();
 
-        // 2. Update Buyer Balance
-        User buyer = buyerAuth.get();
-        buyer.setBalance(buyer.getBalance() - item.getPrice());
-        userRepository.save(buyer);
-
-        // 3. Update Seller Balance
+        double totalCost = item.getPrice() * quantity;
+        User buyer = userRepository.findById(item.getOwnerId()).orElseThrow();
         User seller = userRepository.findById(item.getOwnerId()).orElseThrow();
-        seller.setBalance(seller.getBalance() + item.getPrice());
+
+        // Update balances
+        buyer.setBalance(buyer.getBalance() - totalCost);
+        seller.setBalance(seller.getBalance() + totalCost);
+        userRepository.save(buyer);
         userRepository.save(seller);
 
-        // 4. Create Transaction Record (The Partitioned Data)
-        Transaction tx = new Transaction();
-        tx.setBuyerId(buyer.getId());
-        tx.setSellerId(seller.getId());
-        tx.setItemId(item.getId());
-        tx.setAmount(item.getPrice());
-        tx.setCreatedAt(LocalDateTime.now());
-        transactionRepository.save(tx);
+        // Update new Item owner, quantity
+        int remaining = item.getQuantity() - quantity;
+        if (remaining == 0) {
+            item.setStatus(ItemStatus.SOLD);
+            item.setOwnerId(buyer.getId());
+        } else {
+            item.setQuantity(remaining);
+            Item soldItem = item.toBuilder()
+                    .id(null)
+                    .quantity(quantity)
+                    .status(ItemStatus.SOLD)
+                    .ownerId(buyerId)
+                    .build();
 
-        // 5. Update new Item owner
-        item.setOwnerId(buyer.getId());
+            itemRepository.save(soldItem);
+        }
+
         itemRepository.save(item);
 
-        return 200;
+        // Create Transaction Record
+        Transaction tx = Transaction.builder()
+                .buyerId(buyer.getId())
+                .sellerId(seller.getId())
+                .itemId(item.getId())
+                .amountPaid(totalCost)
+                .quantity(quantity)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        return transactionRepository.save(tx);
     }
 
-    // Requirement VII: View Purchased Items
     public List<Transaction> getPurchaseHistory(String userId) {
-        // We query the transaction collection directly by the buyerId index
         return transactionRepository.findByBuyerId(userId);
+    }
+
+    public List<Transaction> getSalesHistory(String userId) {
+        return transactionRepository.findBySellerId(userId);
     }
 }
