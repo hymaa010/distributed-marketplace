@@ -2,7 +2,6 @@ package org.team13.marketplace.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import org.team13.marketplace.model.Item;
 
 import java.util.List;
 
@@ -15,11 +14,11 @@ public class AccountInfoResponse {
     private String email;
     private double balance;
     // Items this user currently has
-    private List<Item> ownedItems;
+    private List<ItemDto> ownedItems;
 
     // Items this user bought from others
-    private List<PurchasedItem> purchasedItems;
+    private List<ItemDto> purchasedItems;
 
     // Items this user has successfully sold
-    private List<PurchasedItem> soldItems;
+    private List<ItemDto> soldItems;
 }

@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.team13.marketplace.dto.AccountInfoResponse;
+import org.team13.marketplace.dto.ItemDto;
 import org.team13.marketplace.dto.LoginRequest;
-import org.team13.marketplace.dto.PurchasedItem;
+import org.team13.marketplace.model.PurchasedItem;
 import org.team13.marketplace.dto.RegisterRequest;
 import org.team13.marketplace.exception.MarketplaceException;
 import org.team13.marketplace.model.Item;
@@ -72,13 +73,13 @@ public class UserService {
     public AccountInfoResponse getAccountInfo(String userId) {
         User user = getUserById(userId);
 
-        List<Item> ownedItems = itemRepository.findByOwnerId(userId);
+        List<ItemDto> ownedItems = itemRepository.findByOwnerId(userId).stream().map(UserService::itemToDto).toList();
 
         List<Transaction> buyerTransactions = transactionRepository.findByBuyerId(userId);
-        List<PurchasedItem> boughtItems = buyerTransactions.stream().map(Transaction::getPurchasedItem).toList();
+        List<ItemDto> boughtItems = buyerTransactions.stream().map(UserService::purchasedItemToDto).toList();
 
         List<Transaction> sellerTransactions = transactionRepository.findBySellerId(userId);
-        List<PurchasedItem> soldItems = sellerTransactions.stream().map(Transaction::getPurchasedItem).toList();
+        List<ItemDto> soldItems = sellerTransactions.stream().map(UserService::purchasedItemToDto).toList();
 
         return AccountInfoResponse.builder()
                 .userId(user.getId())
@@ -88,6 +89,30 @@ public class UserService {
                 .ownedItems(ownedItems)
                 .soldItems(soldItems)
                 .purchasedItems(boughtItems)
+                .build();
+    }
+
+    private static ItemDto itemToDto(Item item) {
+        return ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .brand(item.getBrand())
+                .description(item.getDescription())
+                .price(item.getPrice())
+                .quantity(item.getQuantity())
+                .status(item.getStatus().name())
+                .ownerId(item.getOwnerId())
+                .build();
+    }
+
+    private static ItemDto purchasedItemToDto(Transaction t) {
+        return ItemDto.builder()
+                .id(t.getPurchasedItem().getId())
+                .name(t.getPurchasedItem().getName())
+                .brand(t.getPurchasedItem().getBrand())
+                .description(t.getPurchasedItem().getDescription())
+                .price(t.getPurchasedItem().getPrice())
+                .quantity(t.getQuantity())
                 .build();
     }
 

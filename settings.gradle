@@ -1,1 +1,5 @@
 rootProject.name = 'marketplace'
+
+include 'marketplace-common'
+include 'marketplace-server'
+include 'marketplace-client'

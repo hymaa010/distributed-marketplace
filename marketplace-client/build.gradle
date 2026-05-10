@@ -1,0 +1,26 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+application {
+    mainClass = 'org.team13.marketplace.client.Launcher'
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+javafx {
+    version = "21"
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+dependencies {
+    implementation project(':marketplace-common')
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'tools.jackson.core:jackson-databind'
+}

@@ -3,7 +3,7 @@ package org.team13.marketplace.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.team13.marketplace.dto.PurchasedItem;
+import org.team13.marketplace.model.PurchasedItem;
 import org.team13.marketplace.model.Item;
 import org.team13.marketplace.model.ItemStatus;
 import org.team13.marketplace.model.Transaction;

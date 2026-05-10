@@ -1,7 +1,6 @@
-package org.team13.marketplace.dto;
+package org.team13.marketplace.model;
 
 import lombok.Data;
-import org.team13.marketplace.model.Item;
 
 @Data
 public class PurchasedItem {
