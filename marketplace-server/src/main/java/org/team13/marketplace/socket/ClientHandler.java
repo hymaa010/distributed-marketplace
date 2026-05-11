@@ -7,11 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.team13.marketplace.dto.auth.LoginRequest;
 import org.team13.marketplace.dto.auth.RegisterRequest;
 import org.team13.marketplace.dto.item.AddItemRequest;
+import org.team13.marketplace.dto.item.ProductEnrichmentRequest;
 import org.team13.marketplace.dto.item.UpdateItemRequest;
 import org.team13.marketplace.dto.transaction.PurchaseRequest;
 import org.team13.marketplace.dto.user.ProfileRequest;
 import org.team13.marketplace.dto.user.UserDto;
 import org.team13.marketplace.exception.MarketplaceException;
+import org.team13.marketplace.service.AIService;
 import org.team13.marketplace.service.ItemService;
 import org.team13.marketplace.service.TransactionService;
 import org.team13.marketplace.service.UserService;
@@ -35,6 +37,7 @@ public class ClientHandler implements Runnable {
     private final ItemService itemService;
     private final UserService userService;
     private final TransactionService transactionService;
+    private final AIService aiService;
     private final JsonMapper mapper;
     private final Validator validator;
 
@@ -120,6 +123,12 @@ public class ClientHandler implements Runnable {
                 case "REMOVE_ITEM" -> {
                     itemService.removeItem((String) p.get("itemId"), authenticatedUserId);
                     send(out, "OK", "Removed", null);
+                }
+
+                case "AI_ENRICH" -> {
+                    ProductEnrichmentRequest r = cast(p, ProductEnrichmentRequest.class);
+                    validate(r);
+                    send(out, "OK", "Enriched Description", aiService.enrichProduct(r));
                 }
 
                 case "SEARCH" -> send(out, "OK", null,

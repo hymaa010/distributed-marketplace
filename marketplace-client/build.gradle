@@ -13,7 +13,7 @@ java {
 
 javafx {
     version = "21"
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = ['javafx.controls', 'javafx.fxml']
 }
 
 dependencies {
@@ -23,4 +23,5 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     implementation 'tools.jackson.core:jackson-databind'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
 }
