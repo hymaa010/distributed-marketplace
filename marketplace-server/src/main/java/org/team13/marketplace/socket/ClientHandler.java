@@ -4,9 +4,14 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.team13.marketplace.dto.*;
+import org.team13.marketplace.dto.auth.LoginRequest;
+import org.team13.marketplace.dto.auth.RegisterRequest;
+import org.team13.marketplace.dto.item.AddItemRequest;
+import org.team13.marketplace.dto.item.UpdateItemRequest;
+import org.team13.marketplace.dto.transaction.PurchaseRequest;
+import org.team13.marketplace.dto.user.ProfileRequest;
+import org.team13.marketplace.dto.user.UserDto;
 import org.team13.marketplace.exception.MarketplaceException;
-import org.team13.marketplace.model.User;
 import org.team13.marketplace.service.ItemService;
 import org.team13.marketplace.service.TransactionService;
 import org.team13.marketplace.service.UserService;
@@ -84,7 +89,7 @@ public class ClientHandler implements Runnable {
                 case "LOGIN" -> {
                     LoginRequest r = cast(p, LoginRequest.class);
                     validate(r);
-                    User u = userService.login(r);
+                    UserDto u = userService.login(r);
                     authenticatedUserId = u.getId();
                     send(out, "OK", "Logged in", u);
                 }
@@ -130,6 +135,18 @@ public class ClientHandler implements Runnable {
 
                 case "ACCOUNT" -> send(out, "OK", null,
                         userService.getAccountInfo(authenticatedUserId));
+
+                case "GET_PROFILE" -> {
+                    ProfileRequest r = cast(p, ProfileRequest.class);
+                    validate(r);
+                    send(out, "OK", null, userService.getProfile(r.getUserId()));
+                }
+
+                case "GET_NAME" -> {
+                    ProfileRequest r = cast(p, ProfileRequest.class);
+                    validate(r);
+                    send(out, "OK", null, userService.getUser(r.getUserId()));
+                }
 
                 case "LOGOUT" -> {
                     authenticatedUserId = null;

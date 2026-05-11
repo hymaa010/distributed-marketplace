@@ -1,8 +1,11 @@
 package org.team13.marketplace.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.team13.marketplace.model.Item;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.team13.marketplace.dto.item.ItemDto;
 import org.team13.marketplace.service.ItemService;
 
 import java.util.List;
@@ -15,8 +18,8 @@ public class ItemController {
     private ItemService itemService;
 
     @GetMapping
-    public List<Item> getAll() {
-        return itemService.getAllItems();
+    public List<ItemDto> getAllAvailable() {
+        return itemService.getAllAvailableItems();
     }
 
 //    @PostMapping
@@ -25,7 +28,7 @@ public class ItemController {
 //    }
 
     @GetMapping("/search")
-    public List<Item> search(@RequestParam String q) {
+    public List<ItemDto> search(@RequestParam String q) {
         return itemService.searchItems(q);
     }
 }

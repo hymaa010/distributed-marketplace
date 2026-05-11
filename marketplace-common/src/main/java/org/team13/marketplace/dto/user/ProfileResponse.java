@@ -1,18 +1,17 @@
-package org.team13.marketplace.dto;
+package org.team13.marketplace.dto.user;
 
 import lombok.Builder;
 import lombok.Data;
+import org.team13.marketplace.dto.item.ItemDto;
 
 import java.util.List;
 
 @Data
 @Builder
-public class AccountInfoResponse {
+public class ProfileResponse {
 
     private String userId;
     private String username;
-    private String email;
-    private double balance;
     // Items this user currently has
     private List<ItemDto> ownedItems;
 

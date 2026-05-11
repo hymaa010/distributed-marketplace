@@ -5,25 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Sharded;
 
-import java.time.LocalDateTime;
-
-@Document(collection = "users")
+@Document(collection = "user_accounts")
 @Sharded(shardKey = "_id")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class User {
+public class UserAccount {
     @Id
     private String id;
-    @Indexed
-    private String username;
-    @Indexed
-    private String email;
-    private String passwordHash;
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private double balance = 0.0;
 }

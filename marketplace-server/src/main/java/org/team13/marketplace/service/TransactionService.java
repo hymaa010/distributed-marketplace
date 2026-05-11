@@ -3,39 +3,36 @@ package org.team13.marketplace.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.team13.marketplace.model.PurchasedItem;
-import org.team13.marketplace.model.Item;
-import org.team13.marketplace.model.ItemStatus;
-import org.team13.marketplace.model.Transaction;
-import org.team13.marketplace.model.User;
+import org.team13.marketplace.dto.transaction.TransactionDto;
+import org.team13.marketplace.mapper.TransactionMapper;
+import org.team13.marketplace.model.*;
 import org.team13.marketplace.repository.ItemRepository;
 import org.team13.marketplace.repository.TransactionRepository;
-import org.team13.marketplace.repository.UserRepository;
+import org.team13.marketplace.repository.UserAccountRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
 
-    private final UserRepository userRepository;
+    private final UserAccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final ItemRepository itemRepository;
 
     @Transactional
-    public Transaction purchaseItem(String buyerId, String itemId, int quantity) {
+    public TransactionDto purchaseItem(String buyerId, String itemId, int quantity) {
         Item item = itemRepository.findById(itemId).orElseThrow();
 
         double totalCost = item.getPrice() * quantity;
-        User buyer = userRepository.findById(item.getOwnerId()).orElseThrow();
-        User seller = userRepository.findById(item.getOwnerId()).orElseThrow();
+        UserAccount buyer = accountRepository.findById(item.getOwnerId()).orElseThrow();
+        UserAccount seller = accountRepository.findById(item.getOwnerId()).orElseThrow();
 
         // Update balances
         buyer.setBalance(buyer.getBalance() - totalCost);
         seller.setBalance(seller.getBalance() + totalCost);
-        userRepository.save(buyer);
-        userRepository.save(seller);
+        accountRepository.save(buyer);
+        accountRepository.save(seller);
 
         // Update new Item owner, quantity
         int remaining = item.getQuantity() - quantity;
@@ -57,22 +54,14 @@ public class TransactionService {
         itemRepository.save(item);
 
         // Create Transaction Record
-        Transaction tx = Transaction.builder()
+        Transaction tx = transactionRepository.save(Transaction.builder()
                 .buyerId(buyer.getId())
                 .sellerId(seller.getId())
                 .purchasedItem(new PurchasedItem(item))
                 .quantity(quantity)
                 .createdAt(LocalDateTime.now())
-                .build();
+                .build());
 
-        return transactionRepository.save(tx);
-    }
-
-    public List<Transaction> getPurchaseHistory(String userId) {
-        return transactionRepository.findByBuyerId(userId);
-    }
-
-    public List<Transaction> getSalesHistory(String userId) {
-        return transactionRepository.findBySellerId(userId);
+        return TransactionMapper.toDto(tx);
     }
 }

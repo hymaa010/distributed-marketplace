@@ -1,4 +1,4 @@
-package org.team13.marketplace.dto;
+package org.team13.marketplace.dto.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
